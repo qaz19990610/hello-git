@@ -1,0 +1,278 @@
+104.199.249.241
+
+
+
+◆shell的小小知識◆
+相對路徑 可以很有彈性的運用 不用每到一個環境就重新寫入../XXX
+
+
+#!/bin/bash  #!/usr/bin/python >>如果要使用什麼語言執行就得加上這行(必要)
+path 可以用 echo $path 或是 evn 查看
+
+1-1 導向 
+標準輸出指的是『指令執行所回傳的正確的訊息』，
+而標準錯誤輸出可理解為『 指令執行失敗後，所回傳的錯誤訊息』
+
+1.標準輸入　　(stdin) ：代碼為 0 ，使用 < 或 << ；
+2.標準輸出　　(stdout)：代碼為 1 ，使用 > 或 >> ；
+3.標準錯誤輸出(stderr)：代碼為 2 ，使用 2>或 2>>；
+
+1> ：以(覆蓋)的方法將『正確的資料』輸出到指定的檔案或裝置上；
+1>>：以{累加}的方法將『正確的資料』輸出到指定的檔案或裝置上； 
+2> ：以{覆蓋}的方法將『錯誤的資料』輸出到指定的檔案或裝置上；
+2>>：以(累加)的方法將『錯誤的資料』輸出到指定的檔案或裝置上；
+ex:1.1: ll / > test  test就會產生有ll的新檔案
+ex:1.2: ll / >>test  test就會多增加一次test 而且不會被覆蓋檔案而是在第一次的ll下再新增一次 
+tip:若以 > 輸出到一個已存在的檔案中，那個檔案就會被覆蓋掉囉！
+
+1.2 eof 
+當由鍵盤輸入 eof 時，該次輸入就結束
+cat > catfile << "eof" //輸入eof 鍵盤輸入就會結束 
+
+1.3 cut 
+切 echo ${PATH} | cut -d ':' -f 5 //以: 作為分隔 
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+        1      :       2      :    3    :    4   :   5    
+印出 >  /root/bin
+tip: cut 主要的用途在於將『同一行裡面的資料進行分解！』最常使用在分析一些數據或文字資料的時候！ 
+
+鳥哥第十章後半可查到
+
+grep sort(排序) uniq(僅列出一項) join(兩個檔案當中，有 "相同資料" 的那一行，才將他加在一起)
+paste (將兩行貼在一起，且中間以 [tab] 鍵隔開)  split(分割命令，如果你有檔案太大，
+導致一些攜帶式裝置無法複製的問題，嘿嘿！找 split 就對了！)
+
+1-4 grep/sed (第十一章)
+● grep [-A] [-B] [--color=auto] '搜尋字串' filename
+選項與參數：
+-A ：後面可加數字，為 after 的意思，除了列出該行外，後續的 n 行也列出來；
+-B ：後面可加數字，為 befer 的意思，除了列出該行外，前面的 n 行也列出來；
+--color=auto 可將正確的那個擷取資料列出顏色
+ex1.1:grep -n 'the' regular_express.txt 搜尋有the的字
+// n是 列出行數
+ex1.2:ps aux |grep jenkins
+
+● sed [-nefr] [動作]
+-a 先增 可接字串
+-c 取代 可接字串
+-d 刪除 
+-i 插入
+-p 列印
+-s 取代 
+
+1-5 最基本的輸入印出
+read -p / echo -e
+ 
+ex1.3: 
+read -p "enter:" n1
+read -p "enter again" n2
+echo -e "\nYou :${n1} ${n2}"
+
+
+觀念
+sh 執行bash 那就會在 子 程序中執行
+soucre 執行bash 變數也會直接在 父 程序中存在
+>> echo ${}可查詢
+
+1-6 test 
+
+可測試是否存在此檔案 或是檔案類型等 ...
+test -e /dmtsai && echo "exist" || echo "Not exist"
+
+1-7 利用判斷符號 [ ]
+
+其實在 bash 當中使用一個等號與兩個等號的結果是一樣的。
+我們在中括號內重點在於『判斷』
+● 在中括號 [] 內的每個元件都需要有空白鍵來分隔；
+● 在中括號內的變數，最好都以雙引號括號起來；
+中括號比較常用在條件判斷式 if ..... then ..... fi 的情況中就是了
+
+1-8 Shell script 的預設變數($0, $1...)
+> 在sh _____.sh 檔之後加的變數
+
+/path/to/scriptname  opt1  opt2  opt3  opt4 
+       $0             $1    $2    $3    $4
+	   
+	   
+● $# ：代表後接的參數『個數』，以上表為例這裡顯示為『 4 』；
+●"$@" ：代表『 "$1" "$2" "$3" "$4" 』之意，每個變數是獨立的(用雙引號括起來)；
+●"$*" ：代表『 "$1c$2c$3c$4" 』，其中 c 為分隔字元，預設為空白鍵， 所以本例中代表『 "$1 $2 $3 $4" 』之意。	   
+
+1-9 if elif else fi 
+●if [ "${1}" == "hello" ]; then
+	echo "Hello, how are you ?"
+elif [ "${1}" == "" ]; then
+	echo "You MUST input parameters, ex> {${0} someword}"
+else
+	echo "The only parameter is 'hello', ex> {${0} hello}"
+fi 
+ 
+1-10  netstat -tuln
+>　開啟的網路服務埠口 (service ports)
+80: WWW
+22: ssh
+21: ftp
+25: mail
+111: RPC(遠端程序呼叫)
+631: CUPS(列印服務功能)
+
+1-11 利用 case ..... esac 判斷
+case  $變數名稱 in   
+  "第一個變數內容")  
+	程式段
+	;;            
+  "第二個變數內容")
+	程式段
+	;;
+  *)                 <==最後一個變數內容都會用 * 來代表所有其他值
+	
+	exit 1
+	;;
+esac               
+
+●●●●●磁碟分割●●●●●
+1-1.1 lsblk -f 
+可看UUID(是全域單一識別碼，將系統內裝置給予一個獨一的識別碼，
+識別碼就可以拿來作為掛載或者是使用這個裝置/檔案系統之用了。)
+沒加參數 可看R0 是否可以被移除
+
+1-1.2 blkid 
+可看UUID 
+
+1-3 磁碟分割有 GPT & MBR  
+parted /dev/sda print 指令可知分割為何
+tips: 使用的 裝置檔名 加上數字， partition 是針對 整個磁碟裝置而不是某個partition
+ex: Partition Table: { gpt }
+MBR 分割就用 fdisk分割，GPT就用gdisk 
+
+1-4 新增分割區
+gdisk /dev/vda 
+p 列印
+n 新增分割區從defeaut開始
+first用decfueat last sector 不要用defueat 可用500M ...
+type '    '  ; p 就新增完畢
+然後出去後W 寫入 Q 不儲存 
+1-5 刪除
+d 
+看鳥哥7-3.2
+!!!! 萬分注意！不要去處理一個正在使用中的分割槽！
+
+1-6 磁碟格式化(建置檔案系統)
+ mkfs.xfs [-b bsize] [-d parms] [-i parms] [-l parms] [-L label] [-f] \ [-r parms] 裝置名稱 
+ (鳥哥7.3.3)
+ 
+1-7 xfs_repair 處理 XFS 檔案系統
+由於 當機非常可能導致檔案系統的錯亂，當有 xfs 檔案系統錯亂才需要使用這個指令！
+所以，這個指令最好是不要用到啦！但有問題發生時，這個指令卻又很重要...
+
+xfs_repair [-fnd] 裝置名稱
+tips: xfs_repair 可以檢查/修復檔案系統，因為修復檔案系統是龐大的任務！
+因此修復時該檔案系統不能被掛載！
+
+1-8 fsck 
+fsck 是個綜合指令，如果是針對 ext4 的話，建議直接使用 fsck.ext4 來檢測比較妥當！
+fsck.ext4 [-pf] [-b superblock] 裝置名稱
+
+選項與參數：
+
+● -p  ：當檔案系統在修復時，若有需要回覆 y 的動作時，自動回覆 y 來繼續進行修復動作。
+● -f  ：強制檢查！一般來說，如果 fsck 沒有發現任何 unclean 的旗標，不會主動進入
+      細部檢查的，如果您想要強制 fsck 進入細部檢查，就得加上 -f 旗標囉！
+● -D  ：針對檔案系統下的目錄進行最佳化配置。
+● -b  ：後面接 superblock 的位置！一般來說這個選項用不到。但是如果你的 superblock 因故損毀時，
+      透過這個參數即可利用檔案系統內備份的 superblock 來嘗試救援。一般來說，superblock 備份在：
+      1K block 放在 8193, 2K block 放在 16384, 4K block 放在 32768
+	  
+tips: 無論是 xfs_repair 或 fsck.ext4，這都是用來檢查與修正檔案系統錯誤的指令。
+注意：通常只有身為 root 且你的檔案系統有問題的時候才使用這個指令，否則在正常狀況
+下使用此一指令， 可能會造成對系統的危害！
+
+1-9 mount 掛載
+這個目錄是進入磁碟分割槽(其實是檔案系統啦！)的入口就是了。
+● 單一檔案系統不應該被重複掛載在不同的掛載點(目錄)中；
+● 單一目錄不應該重複掛載多個檔案系統；
+● 要作為掛載點的目錄，理論上應該都是空目錄才是。
+ex:如果/home底下有 remi 跟  test兩個目錄如果我又mount到/home底下
+那兩個目錄就會暫時消失，等到新分割的被卸載之後原本的 兩個目錄就會再次跑出來。
+
+mount -a  依照設定檔 /etc/fstab 的資料將所有未掛載的磁碟都掛載上來
+mount [-t 檔案系統] UUID=''   掛載點
+ex1:
+blkid /dev/vda4
+/dev/vda4: UUID="e0a6af55-26e7-4cb7-a515-826a8bd29e90" TYPE="xfs"
+ex2:
+mount UUID="e0a6af55-26e7-4cb7-a515-826a8bd29e90" /data/xfs
+mount: mount point /data/xfs does not exist  # 非正規目錄！所以手動建立它！
+mkdir -p /data/xfs
+mount UUID="e0a6af55-26e7-4cb7-a515-826a8bd29e90" /data/xfs
+df /data/xfs
+Filesystem     1K-blocks  Used Available Use% Mounted on
+/dev/vda4        1038336 32864   1005472   4% /data/xfs
+# 順利掛載，且容量約為 1G 左右沒問題！
+
+cd /dvd /usb 那些請看7.3.5
+
+1-10 設定開機掛載  /etc/fstab
+(這樣就不用每次進入都掛載一次)
+
+● 根目錄 / 是必須掛載的﹐而且一定要先於其它 mount point 被掛載進來。
+● 其它 mount point 必須為已建立的目錄﹐可任意指定﹐但一定要遵守必須的系統目錄架構原則 (FHS)
+● 所有 mount point 在同一時間之內﹐只能掛載一次。
+● 所有 partition 在同一時間之內﹐只能掛載一次。
+● 如若進行卸載﹐您必須先將工作目錄移到 mount point(及其子目錄) 之外。
+
+
+[裝置/UUID等]  [掛載點]  [檔案系統]  [檔案系統參數]  [dump]  [fsck] 
+
+開機時是否進行檔案系統檢驗 fsck 等指令有關。  (上面ㄉ最後一欄)
+
+
+
+●●●●●好用的小指令●●●●●
+
+一. VIM  
+y 複製 p 貼上 5G 尋找行數 U復原
+大寫 V可選擇多行
+
+二. 列出行數
+nl -b a /etc/hosts 
+
+三. 檢查檔案存在
+第十二章一半
+test -e /dmtsai && echo "exist" || echo "Not exist"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+======================================================================================
+○○○效能工具○○○
+top 工作管理員
+pkill -kill -t tty (登出tty的帳戶)
+vmstat 對作業系統虛擬記憶體  進程 cpu活動進行監控
+sar
+iostat -c 監控系統 IO 狀態和效能
+
+df-h 
+Filesystem  Size     Used Avail Use%  Mounted on
+檔案系統    檔案大小 已用 可用  已用% 掛載點
+-------
+ps
+
+STAT: 該行程的狀態，linux的程序有5種狀態：
+D 不可中斷 uninterruptible sleep (usually IO)
+R 執行 runnable (on run queue)
+S 中斷 sleeping
+T 停止 traced or stopped
+Z 僵死 a defunct (”zombie”) process
