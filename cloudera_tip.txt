@@ -1,0 +1,116 @@
+hyper V 要改網路介面卡 DEFAULT SWITCH
+
+---------------------------
+掛載iso光碟
+
+先查看檔案 ls -l /dev/cdrom
+mount -o ro /dev/cdrom /mnt/m
+ vim /etc/yum.repos.d/localrepo.repo
+
+[localrepo]
+name=Local Repository
+baseurl=file:///mnt/m/
+gpgcheck=0
+enabled=1
+要把 /etc/yum.repod.d/下的檔案都刪除
+cd /mnt/m/Packages
+rpm -ivh createrepo-0.9.9-28.el7.noarch.rpm --nodeps --force
+yum update
+createrepo -v /mnt/n
+rpm -ivh ntp-4.2.6p5-29.el7.centos.x86_64.rpm --nodeps --force
+------------------------------------
+主節點下載 maridb
+
+yum install mariadb-server
+systemctl enable mariadb
+systemctl start mariadb
+systemctl status mariadb
+
+mysql_secure_installation
+回車
+除了遠程root 是no
+其他都y 
+mysql -V
+
+
+*/登入/*
+mysql -u root -h localhost -p
+show databases;
+use mysql;
+show tables;
+select Host,User,Password from user;
+delete from user where host='master';
+/opt/cloudera/cm/schema/scm_prepare_database.sh mysql  -h 192.168.40.137 scm scm
+>> 密碼 wzlinux
+
+記得放 mysql-connector-java-5.1.33-bin
+
+*/chrony*/
+修改時間
+第一台
+vim /etc/chrony.conf                               
+server改 四台id的主機
+下面allow改我自己的
+例如:192.168.40.0/24
+systemctl enable chronyd.service && systemctl restarchronyc sourcest chronyd.service
+
+--其他的---
+vim /etc/chrony.conf  
+# Please consider joining the pool (http://www.pool.ntp.org/join.html).
+
+#server 0.centos.pool.ntp.org iburst
+#server 1.centos.pool.ntp.org iburst
+#server 2.centos.pool.ntp.org iburst
+#server 3.centos.pool.ntp.org iburst
+server 192.168.40.137 iburst
+
+systemctl enable chronyd.service && systemctl restart chronyd.service
+-------------------
+chronyc sources查看
+-------------------
+/* 'localhost' 'my IP' */
+
+CREATE DATABASE scm DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON scm.* TO 'scm'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON scm.* TO 'scm'@'192.168.40.133' IDENTIFIED BY 'syscom';
+CREATE DATABASE amon DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON amon.* TO 'amon'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON amon.* TO 'amon'@'192.168.40.133' IDENTIFIED BY 'syscom';
+CREATE DATABASE rman DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON rman.* TO 'rman'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON rman.* TO 'rman'@'192.168.40.133' IDENTIFIED BY 'syscom';
+CREATE DATABASE hue DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON hue.* TO 'hue'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON hue.* TO 'hue'@'192.168.40.133' IDENTIFIED BY 'syscom';
+CREATE DATABASE metastore DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON metastore.* TO 'hive'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON metastore.* TO 'hive'@'192.168.40.133' IDENTIFIED BY 'syscom';
+CREATE DATABASE oozie DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL ON oozie.* TO 'oozie'@'localhost' IDENTIFIED BY 'syscom';
+GRANT ALL ON oozie.* TO 'oozie'@'192.168.40.133' IDENTIFIED BY 'syscom';
+
+-///Apache配置錯誤AH00558///
+vim /etc/httpd/conf/httpd.conf
+ServerName www.example.com:80
+*
+
+-----------------
+192.168.40.137
+192.168.40.133
+192.168.40.134
+192.168.40.130
+-----------------QA------------
+
+/etc/cloudera-scm-agent <<<< 要改 master
+////var/run/cloudera-scm-agent/
+sha1sum CDH-6.1.1-1.cdh6.1.1.p0.875250-el7.parcel | awk '{ print $1 }' > CDH-6.1.1-1.cdh6.1.1.p0.875250-el7.parcel.sha
+檔名不可以有256 !
+-----------------------------------
+/run/cloudera-scm-agent
+/var/lib/cloudera-scm-agent
+/var/log/cloudera-scm-agent
+/etc/default/cloudera-scm-agent
+/etc/cloudera-scm-agent <<<<
+  
+
+chown -R cloudera-scm.cloudera-scm 
